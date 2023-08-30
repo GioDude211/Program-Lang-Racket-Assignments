@@ -10,7 +10,15 @@
         ((< result 10) (display "The result is less than  -10: ") (display result))
         (else (display "The result is between -10 and 10: ") (display result))))
 
-; Calculate and print the result of the expression for x = 5
-(display "Result: ")
+; Calculate and print the result of the expression for x
+(display "Result 1: ")
 (print-different-output 5)
+(newline)
+
+(display "Result 2: ")
+(print-different-output .1)
+(newline)
+
+(display "Result 3: ")
+(print-different-output -4)
 (newline)
