@@ -1,7 +1,7 @@
 #lang racket
 
 (define (calculate-expression x)
-    + 30 (* 2 x) (-(* 3 x x)))
+    (+ 30 (* 2 x) (- (* 3 x x))))
 
 (define (print-different-output x)
     (define result (calculate-expression x))
@@ -16,7 +16,7 @@
 (newline)
 
 (display "Result 2: ")
-(print-different-output .1)
+(print-different-output 2.6)
 (newline)
 
 (display "Result 3: ")
