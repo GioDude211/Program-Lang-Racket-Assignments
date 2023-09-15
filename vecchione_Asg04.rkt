@@ -10,7 +10,7 @@
 ;x - x2/2 + x3/3 - x4/4 ... = ln(x+1)
 
 #lang racket
-
+;CHECK
 
 ; Named recursive function for mercator
 (define (mercator-named n)
