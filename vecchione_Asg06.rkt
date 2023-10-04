@@ -3,7 +3,7 @@
 ;Date: 9/25/23
 ;Subject: Asg 06
 ;1.Write a recursive function listLength that counts the number of items in a list.
-;You may not use the racket functions ‘length’, ‘set!’, ‘filter’, ‘takef’, ‘dropf’ or ‘flatten’.
+;You may not use the racket functions length, set!, filter, takef, dropf or flatten.
 ;2.Write a recursive function deepListLength that return the number of atoms (things that are not lists) in a list.
 ;Your functions are not required to be tail recursive
 

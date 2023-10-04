@@ -18,7 +18,7 @@
     (- (* 9 x x) (* 3 x) 25)) ; Defining the polynomial function 9x^2 - 3x - 25
 
 (define (poly-fn2 x)
-    (- (* 11 x x) (* 2 x) 50)) ; Defining the polynomial function 11x^2 - 2x – 50
+    (- (* 11 x x) (* 2 x) 50)) ; Defining the polynomial function 11x^2 - 2x - 50
 
 (define root (secant-method poly-fn 0.0 4.0 .00001)) ; Find the root with initial approximations 0.0 and 5.0 and desired accuracy 1e-9
 (define root2 (secant-method poly-fn2 -5.0 1 .00001 )) ; starting values -5 and 1
