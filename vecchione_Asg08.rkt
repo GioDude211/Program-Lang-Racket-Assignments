@@ -64,3 +64,7 @@
 ; Insert a new node and print tree before and after insertion
 (define new-root (insert-and-print-tree root 17))
 
+
+;NOTE TO SELF:
+;Incorrect format, apparently prof. wants this as a list and sublists with two spots as the subnodes.
+;kind've like a fake binary sorted tree?
