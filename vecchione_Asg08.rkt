@@ -8,63 +8,39 @@
 
 #lang racket
 
-; Define a node structure
-(struct node (val left right))
+; Check if the tree is empty
+(define (empty-tree? tree)
+  (null? tree))
 
-; Recursive function to insert a key into a BST
-(define (insert root key)
+; Inserts a value into the tree
+(define (tree-insert val tree)
   (cond
-    [(null? root) 
-     (node key #f #f)]
-    [(< key (node-val root)) 
-     (node (node-val root)
-           (if (node-left root)
-               (insert (node-left root) key)
-               (node key #f #f))
-           (node-right root))]
-    [else
-     (node (node-val root)
-           (node-left root)
-           (if (node-right root)
-               (insert (node-right root) key)
-               (node key #f #f)))]))
+    [(empty-tree? tree) (list val)] ; Return the value as a list if tree is empty
+    
+    [(= (length tree) 1) ; If tree is a single value
+     (if (< val (car tree))
+         (list (car tree) (list val)) ; Insert to the left
+         (list (car tree) '() (list val)))] ; Insert to the right
 
-; Function to perform an inorder traversal of a BST
-(define (inorder root)
-  (if (not root)
-      '()
-      (append (inorder (node-left root)) (list (node-val root)) (inorder (node-right root)))))
+    [(= (length tree) 2) ; If tree has left child but no right child
+     (list (car tree) (cadr tree) (list val))] ; Insert to the right
 
-; Function to print the BST using inorder traversal
-(define (print-tree root)
-  (display "Tree: ")
-  (display (inorder root))
-  (newline))
+    [else ; If tree has both left and right child
+     (list (car tree) (cadr tree) (tree-insert val (caddr tree)))] ; Insert to the right subtree
+  )
+)
 
-; Function to insert a key and print the BST before and after insertion
-(define (insert-and-print-tree root key)
-  (display "Before Inserting: ")
-  (print-tree root)
-  (let ([new-root (insert root key)])
-    (display "After Inserting ")
-    (display key)
-    (display ": ")
-    (print-tree new-root)
-    new-root))
+; Test the function
+(display (tree-insert 8 '())) ; should display '(8)
+(newline)
+(display (tree-insert 12 '(8))) ; should display '(8 () (12))
+(newline)
+(display (tree-insert 3 '(8))) ; should display '(8 (3))
+(newline)
+(display (tree-insert 12 '(8 (3)))) ; should display '(8 (3) (12))
+(newline)
+(display (tree-insert 4 '(8 (3) (12)))) ; should display '(8 (3 (4)) (12))
+(newline)
 
-; Example usage:
-; Construct a basic tree for testing
-;       20
-;      /  \
-;    15    25
-;   / \
-;  10  18
-(define root (node 20 (node 15 (node 10 #f #f) (node 18 #f #f)) (node 25 #f #f)))
+;Issue: Works when empty but not when there is a value in place
 
-; Insert a new node and print tree before and after insertion
-(define new-root (insert-and-print-tree root 17))
-
-
-;NOTE TO SELF:
-;Incorrect format, apparently prof. wants this as a list and sublists with two spots as the subnodes.
-;kind've like a fake binary sorted tree?
