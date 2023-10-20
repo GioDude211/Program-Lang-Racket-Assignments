@@ -8,7 +8,10 @@
 
 #lang racket
 
-; FUNCTION 1
+; FUNCTION 1 - DONE
+;Side Note - Had some severe issues keeping track of the syntax, however after learning a better visual
+;I was able to format it similar to functions I've worked with in other languages.
+
 (define (tree-insert val tree)
   (cond
     [(null? tree) (list val)] ; Return the value as a list if tree is empty
@@ -30,7 +33,30 @@
   )
 )
 
-; Test the function
+; FUNCTION 2 - DONE
+;SideNote - Not exact to the output however, output matches list positioning
+; Expected output: '(22 ((7 ((7 ((4 ((3) (5))) ())) (16 ((8 ((8) ())) (17))))) (25 (() (34 ((32) (67))))))
+(define (list-to-tree lst1 tree2)
+    (if (null? lst1) tree2
+      (list-to-tree (cdr lst1) (tree-insert (car lst1) tree2)))
+)
+
+
+;FUNCTION 3 - Done
+(define (tree-to-list tree3)
+  (cond
+    [(null? tree3) '()] ; checks if empty, otherwise returns empty tree
+
+    [(equal? (cdr tree3) '()) (list (car tree3))];if only root, return first element
+
+    [else (append (tree-to-list (cadr tree3)) (list (car tree3)) (tree-to-list (caddr tree3)))]
+    ; ^ else add the tree-to-list of cadr tree to the first node, also add to the tree-to-list of caddr of tree
+  )
+)
+
+
+
+; Testing Function 1
 (display (tree-insert 8 '())) ; should display '(8)
 (newline)
 (display (tree-insert 12 '(8))) ; should display '(8 () (12))
@@ -42,5 +68,8 @@
 (display (tree-insert 4 '(8 (3) (12)))) ; should display '(8 (3 (4)) (12))
 (newline)
 
-;Issue: Works when empty but not when there is a value in place
+; Testing Function 2
+(displayln (list-to-tree '(22 25 7 16 8 34 67 7 32 17 8 4 5 3) '())) 
 
+; Testing Function 3
+(tree-to-list (list-to-tree '(22 25 7 16 8 34 67 7 32 17 8 4 5 3) '()))
