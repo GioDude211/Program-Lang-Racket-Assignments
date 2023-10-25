@@ -10,7 +10,6 @@
 
 (define imageWidth 512)
 (define imageHeight 288)
-(define radius (/ (min imageWidth imageHeight) 2))
 
 
 (define myTarget (make-bitmap imageWidth imageHeight))
