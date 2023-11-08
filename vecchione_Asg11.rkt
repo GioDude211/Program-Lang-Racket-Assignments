@@ -18,6 +18,8 @@
 (send my-dc set-pen my-pen)
 (send my-dc set-brush my-brush)
 
+;Up until this point code is good ----------^
+
 ; Draw a filled polygon on my-dc
 (define points (list (cons 100 100)  ; Point 1 (x1, y1)
                      (cons 300 100)  ; Point 2 (x2, y2)
@@ -25,8 +27,16 @@
                      (cons 100 100))) ; Closing the polygon back to the first point
 (send my-dc draw-polygon points)
 
+;Draw a line (rectangular polygon or something)
+;count every iteration
+;scale it, rotate it, translate it
+;loop it back
+
 
 ; Create a frame (window)
+;Correction - Use Draw to Screen instead makes it easier when shrinking image etc.
+;
+
 (define frame (new frame% [label "Polygon Drawing"]
                           [width imageWidth]
                           [height imageHeight]
