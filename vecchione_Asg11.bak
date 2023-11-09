@@ -20,7 +20,7 @@
 (send my-dc set-pen my-pen)
 (send my-dc set-brush my-brush)
 
-(send my-dc draw-rectangle
+(send dc draw-rectangle
       0 0
       imageHeight imageWidth)
 ;Up until this point code is good ----------^
@@ -33,9 +33,6 @@
 (send my-dc draw-polygon points)
 
 
-; Initialize a variable to keep track of the number of polygons drawn
-(define numPoly 0)
-
 ; Function to draw a branching tree
 (define (drawBranch depth x1 y1 angle length)
   ; Check if the depth is greater than 0
@@ -45,9 +42,9 @@
     (define y2 (- y1 (* length (sin angle))))
 
     ; Draw a line from (x1, y1) to (x2, y2)
-    (send my-dc set-pen "saddle brown" 5 'solid) ; Set the line color and thickness
-    (send my-dc set-brush (make-color 32 22 16) 'solid) ; Set the brush color for filling
-    (send my-dc draw-line x1 y1 x2 y2)
+    (send dc set-pen "saddle brown" 5 'solid) ; Set the line color and thickness
+    (send dc set-brush (make-color 32 22 16) 'solid) ; Set the brush color for filling
+    (send dc draw-line x1 y1 x2 y2)
 
     ; Increment the polygon count
     (set! numPoly (+ numPoly 1))
@@ -62,13 +59,6 @@
 ;count every iteration
 ;scale it, rotate it, translate it
 ;loop it back
-
-; Calculate the X-coordinate of the center of the image
-(define center-x (/ imageWidth 2))
-
-; Start drawing the tree from the center-bottom of the image
-(define start-x center-x)
-(define start-y imageHeight)
 
 
 ; Create a frame (window)
