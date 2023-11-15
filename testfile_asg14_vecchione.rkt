@@ -84,5 +84,35 @@
     (send newPolygon line-to 0 100)
     (send newPolygon close)
     newPolygon)) ; return the new polygon
+
+;Possible revision of duplicate polygon and drawToScreen
+; Polygon points instead of lines
+(define polygon-points '((0 0) (50 0) (50 100) (0 100)))
+
+; Function to create a polygon from a list of points
+(define (createPolygon points)
+  (let ((path (new dc-path%)))
+    (for ([pt (in-list points)])
+      (match-define (list x y) pt)
+      (if (equal? pt (first points))
+          (send path move-to x y)
+          (send path line-to x y)))
+    (send path close)
+    path))
+
+; Function to draw the polygon
+(define (drawToScreen polygon x2 y2)
+  ; Create a new temporary polygon for drawing
+  (define tempPolygon (createPolygon polygon-points))
+  (send tempPolygon translate x2 y2) ; Translate
+  ; Set the brush and pen for the drawing context
+  (send my-dc set-pen "white" 2 'solid)
+  (send my-dc set-brush "purple" 'solid)
+  ; Draw the translated polygon
+  (send my-dc draw-path tempPolygon))
+
+; Use createPolygon to create your initial polygon
+(define myPolygon (createPolygon polygon-points))
+
     
 |#
