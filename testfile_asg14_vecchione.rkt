@@ -47,3 +47,42 @@
 (display "Number of polygons drawn: ")
 (display numPoly)
 (newline)
+
+;ATTEMPTED SCALING GRID, needless to say without knowing a way to draw its pointless
+#|
+; Let's assume the world size is 20x20
+(define worldWidth 20)
+(define worldHeight 20)
+
+; Calculate scale factors
+(define xScale (/ imageWidth worldWidth))
+(define yScale (/ imageHeight worldHeight))
+
+; Conversion function from world to screen coordinates
+(define (world-to-screen wx wy)
+  (let ((sx (+ (* wx xScale) (/ imageWidth 2)))
+        (sy (- (/ imageHeight 2) (* wy yScale))))
+    (values sx sy)))
+
+; Conversion function from screen to world coordinates
+(define (screen-to-world sx sy)
+  (let ((wx (/ (- sx (/ imageWidth 2)) xScale))
+        (wy (/ (- (/ imageHeight 2) sy) yScale)))
+    (values wx wy)))
+  
+;NOTE: wx and wy are world, while sx and sy are screen
+
+
+
+; DUPLICATE POLYGON FUNCTION
+(define (duplicatePolygon inputPolygon)
+  (let ((newPolygon (new dc-path%))) ; create a new polygon
+    ; Add the same points to the new polygon
+    (send newPolygon move-to 0 0) ; input points (works like x-axis and y-axis)
+    (send newPolygon line-to 50 0)
+    (send newPolygon line-to 50 100)
+    (send newPolygon line-to 0 100)
+    (send newPolygon close)
+    newPolygon)) ; return the new polygon
+    
+|#
