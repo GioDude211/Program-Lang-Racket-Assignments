@@ -15,11 +15,8 @@
 (define my-dc (new bitmap-dc% [bitmap my-bitmap]))
 
 ; Set the brush and pen for the drawing context
-(define my-pen (make-pen #:color "white" #:width 1))
-(define my-brush (make-brush #:color "purple"))
-
-(send my-dc set-pen my-pen)
-(send my-dc set-brush my-brush)
+(send my-dc set-pen "white" 2 'solid)
+(send my-dc set-brush "purple" 'solid)
 
 ;background color
 (send my-dc draw-rectangle 0 0 imageWidth imageHeight)
@@ -30,14 +27,6 @@
 (send myPolygon line-to 100 50)
 (send myPolygon line-to 0 50)
 (send myPolygon close)
-
-;Up until this point code is good ----------^
-
-;drawToScreen Function
-(define (drawToScreen polygon)
-  ; Draw the translated polygon on the screen
-  (send my-dc draw-path polygon)
-)
 
 ; DUPLICATE POLYGON FUNCTION
 (define (duplicatePolygon inputPolygon)
@@ -51,39 +40,64 @@
     newPolygon)) ; return the new polygon
 
 
-
-; Initialize a variable to keep track of the number of polygons drawn
+;Up until this point code is good ----------^
 ; Do-loop in racket works like a for-loop,  (do ([i 0 (+ i 1)])
 
+; Start position and parameters for the fractal
+; Adjust the initial X and Y translation amounts for the starting branch
+(define rotateAmount (- (/ pi 2)))
+(define depth 16) ; depth of recursion
+(define initial-baseX (/ imageWidth 2))
+(define initial-baseY imageHeight) ; Start from the bottom of the screen
+
+;Function creates the image (MAIN)
 (define (create-fractal-image depth rotateAmount inputPolygon baseX baseY)
 
   (when (> depth 0) ;; loop on polygons. move it a little, then draw it.
 
     ;Transform current polygon
-    (send inputPolygon scale 0.7 0.7)           ; polygon scale
+    (send inputPolygon scale 0.9 0.9)           ; polygon scale
     (send inputPolygon rotate rotateAmount)     ; polygon rotate in radians
-    (send inputPolygon translate baseX baseY)   ; Translate the polygon upwards, and slightly to the side for branches
+    (define x2 (+ baseX (* 100 (cos rotateAmount))))
+    (define y2 (+ baseY (* 100 (sin rotateAmount))))
+    (send inputPolygon translate x2 y2)
 
     ; draw polygon
     (drawToScreen inputPolygon)                 
     (set! numPoly (+ 1 numPoly))
 
-    ; Calculate new positions for left and right branches
-    (define newBaseX (+ baseX 100)) ; Adjust as needed for the branch separation
-    (define newBaseY (+ baseY 50)) ; Adjust as needed for the branch height
     
+
+    
+
     ; Recursive call for "left" branch
-    (create-fractal-image (- depth 1) (- rotateAmount) (duplicatePolygon inputPolygon) newBaseX newBaseY)
+    (create-fractal-image (- depth 1) (- rotateAmount) (duplicatePolygon inputPolygon) x2 y2)
     ; Recursive call for "right" branch
-    (create-fractal-image (- depth 1) rotateAmount (duplicatePolygon inputPolygon) newBaseX newBaseY)))
+    (create-fractal-image (- depth 1) rotateAmount inputPolygon x2 y2)))
 
+;drawToScreen Function
 
-; Start position and parameters for the fractal
-(define rotateAmount (- (/ pi 6)))
-(define depth 16) ; depth of recursion
-; Adjust the initial X and Y translation amounts for the starting branch
-(define initial-baseX (/ imageWidth 2))
-(define initial-baseY imageHeight) ; Start from the bottom of the screen
+(define (drawToScreen polygon)
+;  Define the screen center coordinates
+  (define screenCenterX (/ imageWidth 2))
+  (define screenCenterY (/ imageHeight 2))
+  
+  ; Get the bounding box of the polygon and unpack the values
+  (define-values (left top right bottom) (send polygon get-bounding-box))
+  
+  ; Calculate the center of the polygon in world coordinates
+  (define polygonCenterX (/ (+ left right) 1.2))
+  (define polygonCenterY (/ (+ top bottom) 1.2))
+  
+  ; Calculate the translation needed to center the polygon on the screen
+  (define translateX (- screenCenterX polygonCenterX))
+  (define translateY (- screenCenterY polygonCenterY))
+  
+  ; Translate the polygon to screen coordinates
+  (send polygon translate translateX translateY)
+  ; Draw the translated polygon on the screen
+  (send my-dc draw-path polygon)
+)
 
 
 (create-fractal-image  depth rotateAmount myPolygon initial-baseX initial-baseY) ; CALL CREATE_FRACTAL_IMAGE FUNCTION
@@ -91,7 +105,8 @@
 ; Create a frame (window)
 (define frame (new frame% [label "Fractal Drawing"]
                           [width imageWidth]
-                          [height imageHeight]))
+                          [height imageHeight]
+                          [alignment '(center center)]))
 
 ; Create a canvas that we will draw on, which is inside the frame
 (define canvas (new canvas% [parent frame]

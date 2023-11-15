@@ -3,11 +3,11 @@
 (require racket/draw)
 (require colors)
 
+
 (define imageWidth 2048)
 (define imageHeight 1152)
-(define numPoly 0)        ; variable to keep track of the polygons drawn
-
-(define radius (/ (min imageWidth imageHeight) 2))
+; variable to keep track of the polygons drawn
+(define numPoly 0)
 
 ; Create a new bitmap of size 2048 x 1152
 (define my-bitmap (make-bitmap imageWidth imageHeight))
@@ -21,96 +21,28 @@
 (send my-dc set-pen my-pen)
 (send my-dc set-brush my-brush)
 
-;background color
-(send my-dc draw-rectangle 0 0 imageWidth imageHeight)
+(send my-dc draw-rectangle 0 0 imageHeight imageWidth)
 
-(define myPolygon (new dc-path%)) ; create polygon
-(send myPolygon move-to 0 0) ; input points (works like x-axis and y-axis)
-(send myPolygon line-to 100 0)
-(send myPolygon line-to 100 50)
-(send myPolygon line-to 0 50)
-(send myPolygon close)
-
-;Up until this point code is good ----------^
-
-;drawToScreen Function
-(define (drawToScreen polygon)
-  ; Draw the translated polygon on the screen
-  (send my-dc draw-path polygon)
-)
-
-; DUPLICATE POLYGON FUNCTION
-(define (duplicatePolygon inputPolygon)
-  (let ((newPolygon (new dc-path%))) ; create a new polygon
-    ; Add the same points to the new polygon
-    (send newPolygon move-to 0 0) ; input points (works like x-axis and y-axis)
-    (send newPolygon line-to 100 0)
-    (send newPolygon line-to 100 50)
-    (send newPolygon line-to 0 50)
-    (send newPolygon close)
-    newPolygon)) ; return the new polygon
-
-
-
-(define (create-fractal-image depth rotateAmount inputPolygon baseX baseY scaleFactor)
+(define (draw-branch my-dc x y length angle depth)
   (when (> depth 0)
-    (define new-scale-factor (* scaleFactor 0.75)) ; Scale down for the next level of branches
-    (define branch-angle (/ pi 6)) ; Adjust this angle for the divergence of branches
+    (define x2 (+ x (* length (cos angle))))
+    (define y2 (+ y (* length (sin angle))))
+    (send my-dc draw-line x y x2 y2)
+    (draw-branch my-dc x2 y2 (* length 0.7) (+ angle (/ pi 4)) (- depth 1))
+    (draw-branch my-dc x2 y2 (* length 0.7) (- angle (/ pi 4)) (- depth 1))))
 
-    ; Calculate new position for the end of the current branch
-    (define end-x (+ baseX (* scaleFactor 100))) ; Assuming 100 is the length of the branch
-    (define end-y baseY)
-
-    ; Draw the current branch
-    (send inputPolygon translate baseX baseY)
-    (send inputPolygon rotate rotateAmount)
-    (send inputPolygon scale scaleFactor scaleFactor)
-    (drawToScreen inputPolygon)
-    (set! numPoly (+ 1 numPoly))
-
-    ; Recursive call for the left branch
-    (create-fractal-image (- depth 1) (- rotateAmount branch-angle) (duplicatePolygon inputPolygon) end-x end-y new-scale-factor)
-
-    ; Reset transformations for the next branch
-    (send inputPolygon scale (/ 1 scaleFactor) (/ 1 scaleFactor))
-    (send inputPolygon rotate (- rotateAmount))
-    (send inputPolygon translate (- baseX) (- baseY))
-
-    ; Recursive call for the right branch
-    (create-fractal-image (- depth 1) (+ rotateAmount branch-angle) (duplicatePolygon inputPolygon) end-x end-y new-scale-factor)
-  )
-)
-
-(define (calculate-end-point x y scale-factor angle)
-  ; Here you will calculate the new end points after scaling and rotation
-  ; You need to adjust this logic to match your specific branch end point calculation
-  (values (+ x (* scale-factor (cos angle))) (+ y (* scale-factor (sin angle)))))
-
-; Adjust initial starting position for the trunk
-; Start position and parameters for the fractal
-(define rotateAmount (- (/ pi 6)))
-(define depth 16) ; depth of recursion
-(define initial-end-x (/ imageWidth 2)) ; Center of the width
-(define initial-end-y imageHeight) ; Bottom of the canvas
-(define initial-scale-factor 1) ; Starting scale factor
-
-; Start drawing the fractal tree
-(create-fractal-image depth rotateAmount myPolygon initial-end-x initial-end-y initial-scale-factor)
-
-
-; Create a frame (window)
-(define frame (new frame% [label "Fractal Drawing"]
+(define (draw-tree)
+  (define frame  (new frame% [label "Fractal Drawing"]
                           [width imageWidth]
                           [height imageHeight]))
+                          
+  (define canvas (new canvas% [parent frame]
+                     [paint-callback
+                      (λ (canvas my-dc)
+                        (draw-branch my-dc 200 400 100 (- (/ pi 2)) 10))]))
+  (send frame show #t))
 
-; Create a canvas that we will draw on, which is inside the frame
-(define canvas (new canvas% [parent frame]
-                           [paint-callback
-                            (lambda (canvas my-dc)
-                              (send my-dc draw-bitmap my-bitmap 0 0))]))
-
-; Show the frame (this actually displays the window)
-(send frame show #t)
+(draw-tree)
 
 (display "Number of polygons drawn: ")
 (display numPoly)
