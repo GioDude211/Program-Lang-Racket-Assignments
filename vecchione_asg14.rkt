@@ -27,7 +27,7 @@
 (send myPolygon line-to 50 100)
 (send myPolygon line-to 0 100)
 (send myPolygon close)
-(send my-dc draw-path myPolygon) ; draw polygon
+
 
 ;Up until this point code is good ----------^
 ; Do-loop in racket works like a for-loop,  (do ([i 0 (+ i 1)])
@@ -37,7 +37,7 @@
 (define rotateAmount (- (/ pi 2)))
 (define depth 16) ; depth of recursion
 (define initial-baseX (/ imageWidth 2))
-(define initial-baseY (/ imageHeight 2)) ; Start from the bottom of the screen
+(define initial-baseY imageHeight) ; Start from the bottom of the screen
 
 
 ;Function creates the image (MAIN)
@@ -64,11 +64,11 @@
 
 
 ;drawToScreen Function
-(define (drawToScreen polygon x1 y1)
+(define (drawToScreen polygon x2 y2)
   ; Set the brush and pen for the drawing context
   (send my-dc set-pen "white" 2 'solid)
   (send my-dc set-brush "purple" 'solid)
-  (send myPolygon translate x1 y1) ;  translate
+  (send myPolygon translate x2 y2) ;  translate
   ; Test screen-to-world conversion
   (send my-dc draw-path polygon)
 )
