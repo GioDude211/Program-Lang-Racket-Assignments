@@ -48,13 +48,14 @@
     (send inputPolygon scale 0.9 0.9)           ; polygon scale
     (send inputPolygon rotate rotateAmount)     ; polygon rotate in radians
     
-
-    ; draw polygon
-    (drawToScreen inputPolygon x1 y1)                 
-    (set! numPoly (+ 1 numPoly))
-
     (define x2 (+ x1 (* .2 (cos rotateAmount))))
     (define y2 (+ y1 (* .2 (sin rotateAmount))))
+
+    ; draw polygon
+    (drawToScreen inputPolygon x2 y2)                 
+    (set! numPoly (+ 1 numPoly))
+
+    
     
     ; Recursive call for "left" branch
     (create-fractal-image (- depth 1) (- rotateAmount) inputPolygon x2 y2)
