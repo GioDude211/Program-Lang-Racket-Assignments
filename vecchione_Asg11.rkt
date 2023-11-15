@@ -27,13 +27,15 @@
 (define numPoly 0)
 
 ; Initialize a variable to keep track of the number of polygons drawn
+; Do-loop in racket works like a for-loop,  (do ([i 0 (+ i 1)])
+
 (define (draw-fractal-polygon x1 y1 length angle depth)
   (when (> depth 0)
-    (let* ((trunk-end-x x1)  ; Trunk goes straight up, so x doesn't change
-           (trunk-end-y (- y1 length))  ; Subtract from y to go upwards
-           (branch-length (* length 0.75))  ; Shrink size for each recursive call
-           (right-x (+ trunk-end-x branch-length)) ; Right branch end x coordinate
-           (left-x (- trunk-end-x branch-length))  ; Left branch end x coordinate
+    (let* ((trunk-end-x x1)                         ; Trunk goes straight up, so x doesn't change
+           (trunk-end-y (- y1 length))              ; Subtract from y to go upwards
+           (branch-length (* length 0.75))          ; Shrink size for each recursive call
+           (right-x (+ trunk-end-x branch-length))  ; Right branch end x coordinate
+           (left-x (- trunk-end-x branch-length))   ; Left branch end x coordinate
            (branch-end-y (- trunk-end-y branch-length)) ; Both branches go up
            )
       (send my-dc set-pen my-pen)

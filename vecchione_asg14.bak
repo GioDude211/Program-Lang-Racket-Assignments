@@ -1,0 +1,23 @@
+#lang racket/gui
+
+(require racket/draw)
+(require colors)
+
+(define imageWidth 2048)
+(define imageHeight 1152)
+
+(define radius (/ (min imageWidth imageHeight) 2))
+
+; Create a new bitmap of size 2048 x 1152
+(define my-bitmap (make-bitmap imageWidth imageHeight))
+; Create a drawing context for the bitmap
+(define my-dc (new bitmap-dc% [bitmap my-bitmap]))
+
+; Set the brush and pen for the drawing context
+(define my-pen (make-pen #:color "white" #:width 1))
+(define my-brush (make-brush #:color "purple"))
+
+(send my-dc set-pen my-pen)
+(send my-dc set-brush my-brush)
+
+(send my-dc draw-rectangle 0 0 imageHeight imageWidth)
