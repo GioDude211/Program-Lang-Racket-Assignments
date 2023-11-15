@@ -27,6 +27,7 @@
 (send myPolygon line-to 50 100)
 (send myPolygon line-to 0 100)
 (send myPolygon close)
+(send my-dc draw-path myPolygon) ; draw polygon
 
 ;Up until this point code is good ----------^
 ; Do-loop in racket works like a for-loop,  (do ([i 0 (+ i 1)])
@@ -47,16 +48,15 @@
     ;Transform current polygon
     (send inputPolygon scale 0.9 0.9)           ; polygon scale
     (send inputPolygon rotate rotateAmount)     ; polygon rotate in radians
-    
-    (define x2 (+ x1 (* .2 (cos rotateAmount))))
-    (define y2 (+ y1 (* .2 (sin rotateAmount))))
+
+    ;Calculate the new x and y (x2, y2)
+    (define x2 (+ x1 (* 100 (cos rotateAmount))))
+    (define y2 (+ y1 (* 50 (sin rotateAmount))))
 
     ; draw polygon
     (drawToScreen inputPolygon x2 y2)                 
     (set! numPoly (+ 1 numPoly))
 
-    
-    
     ; Recursive call for "left" branch
     (create-fractal-image (- depth 1) (- rotateAmount) inputPolygon x2 y2)
     ; Recursive call for "right" branch
