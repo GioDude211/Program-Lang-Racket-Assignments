@@ -1,7 +1,24 @@
+;Programmer: Giovanni Vecchione
+;Date: 11/21/23
+;Subject: Asg_14
+
 #lang racket/gui
 
 (require racket/draw)
 (require colors)
+
+;NOTE:
+;Was able to build the shape of the tree using rectangular polygons which ended up requiring more book keeping then i thought.
+;Rotate function did not work as it kept causing a spiral image!
+
+;ISSUE PRESENT: Was unable to scale down to the required polygon size however it is achievable with this program
+;by setting the values of the scaleFactorX and scaleFactorY to two decimal spots to the right it reached the goal.
+; However it did not retian its shape (did not have time to correct it, noticed it too late)
+;;determined this through iterating through the scaledDistanceX which would be the unit size of the polygon
+;(display "Scaled Distnace: 5.551376302080004e-13") 
+
+;A cool thing tho is that I was able to color code the fractal branching at each iteration.
+ 
 
 ;Set up dimensions for image
 (define imageWidth 2048)
@@ -44,16 +61,39 @@
 ;drawToScreen FUNCTION -NOTHING WRONG HERE
 (define (drawToScreen dc myPolygon)
   (let ([xTrans 800]
-        [yTrans 1280]
-        [xScale .15]
-        [yScale .15])
+        [yTrans 1380]
+        [xScale .25]
+        [yScale .25])
     ; Convert the polygon to screen coordinates
     (send myPolygon scale xScale yScale)
     (send myPolygon translate xTrans yTrans)
+
+ ;changes color of polygons per 10k polygons stops at 30k
+    (cond
+  [(< numPoly 10000)
+   ; Set colors for the first 10,000 polygons
+   (send dc set-pen "black" 2 'solid)
+   (send dc set-brush (make-color 25 22 16) 'solid)]
+
+  [(< numPoly 20000)
+   ; Set colors for the next 10,000 polygons
+   (send dc set-pen "blue" 2 'solid)
+   (send dc set-brush (make-color 100 100 250) 'solid)]
+
+  [(< numPoly 30000)
+   ; Set colors for the next 10,000 polygons
+   (send dc set-pen "green" 2 'solid)
+   (send dc set-brush (make-color 80 250 80) 'solid)]
+
+  ; ... Add more conditions as needed ...
+
+  [else
+   ; Default colors for numPoly >= 30000 or the highest specified range
+   (send dc set-pen "red" 2 'solid)
+   (send dc set-brush (make-color 250 100 100) 'solid)]
+)
+
     
-    ; Draw the polygon in screen coordinates
-    (send dc set-pen "black" 2 'solid) ; set the line color 
-    (send dc set-brush (make-color 25 22 16) 'solid) ; set color for filling
     (send dc draw-path myPolygon)
     
     ; Convert the polygon back to world coordinates
@@ -90,7 +130,7 @@
     
     ;Do-Loop determines how many new branches
     (do ([i 0 (+ i 1)])
-        ((= i 2))
+        ((= i 3))
       
       ;adjust factors for length
       (let* ([scaleFactorY (cond [(= i 0) .5]    
@@ -99,16 +139,16 @@
              
              [scaleFactorX (cond [(= i 0) 1]    
                                   [(= i 1) 0.8]   
-                                  [(= i 2) 0.4])]  
+                                  [(= i 2) .4])]  
              ;rotational change (angle)
               [rotateFactor (cond [(= i 0) -1.3]     
                                   [(= i 1) .5]     
                                   [(= i 2) 0])])
         
     ; Recursive call for "left" branch"
-    (create-fractal-image (- depth 1) (- rotateAmount(* rotateFactor (/ pi 6)))  x2 y2 scaleFactorX scaleFactorY scaledDistanceX scaledDistanceY)
+    (create-fractal-image (- depth 1) (- rotateAmount(* rotateFactor (/ pi 6)))  x2 y2 (* scaleFactorX  1) (* scaleFactorY 1) scaledDistanceX scaledDistanceY)
     ; Recursive call for "right" branch"
-    (create-fractal-image (- depth 1) (+ rotateAmount (* rotateFactor (/ pi 6)))  x2 y2 scaleFactorX scaleFactorY scaledDistanceX scaledDistanceY)))))
+    (create-fractal-image (- depth 1) (+ rotateAmount (* rotateFactor (/ pi 6)))  x2 y2 (* scaleFactorX 1) (* scaleFactorY 1) scaledDistanceX scaledDistanceY)))))
 
 
 
@@ -120,11 +160,3 @@
 (newline)
 
 my-bitmap
-
-;NOTES:The image output is spiral in nature for some reason. The drawToScreen function appears to be not affecting this, furthermore I added a way to correctly
-;track the transformations to keep track of the new x and y coordinates. For some reason I believe this is where the issue resides. I don't think its because of
-;the duplicate poly function
-
-;ISSUE 2: Okay i was able to figure out the form of the tree, next step is to work on the x and y coordinates still
-
-;IT IS CLOSE BUT IT IS NOT TRANSLATING TO THE CORRECT LOCATIONS

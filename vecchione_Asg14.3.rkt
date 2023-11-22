@@ -11,13 +11,8 @@
 (define startX1 (/ imageWidth 2)) ;Start point for X
 (define startY1 imageHeight);Start point for Y
 
-
-; set threshold for smallest polygon
-(define polyThreshold 1.0e-12)
-
 ;establish the dimensions of the polygons
-(define baseLengthX 200)
-(define baseLengthY 300)
+(define baseLength 50)
 
 ; Create a new bitmap of size 2048 x 1152
 (define my-bitmap (make-bitmap imageWidth imageHeight))
@@ -40,15 +35,8 @@
 (define depth 7) ; depth of recursion
 (define scaleFactor 1)
 
-; create starting polygon
-(define inputPolygon (new dc-path%)) 
-(send inputPolygon move-to startX1 startY1) ; input points (works like x-axis and y-axis)
-(send inputPolygon line-to (- startX1 baseLengthX)  startY1)
-(send inputPolygon line-to (- startX1 baseLengthX) (- startY1 baseLengthY))
-(send inputPolygon line-to startX1 (- startY1 baseLengthY))
-(send inputPolygon close)
-
-
+#|
+Was unable to use polygons in this assignment
 ;drawToScreen FUNCTION -NOTHING WRONG HERE
 (define (drawToScreen dc myPolygon)
   (let ([xTrans 800]
@@ -67,36 +55,29 @@
     ; Convert the polygon back to world coordinates
     (send myPolygon translate (- xTrans) (- yTrans))
     (send myPolygon scale (/ 1.0 xScale) (/ 1.0 yScale))))
+|#
+
 
 
 ;Function creates the image (MAIN)
-(define (create-fractal-image depth rotateAmount x1 y1 scaleFactor inputPolygon)
+(define (create-fractal-image depth rotateAmount x1 y1 scaleFactor)
 
   (when (> depth 0) ;; loop on polygons. move it a little, then draw it.
     
-    ; duplicate polygon
-    (define dup_Polygon (new dc-path%))
-    (send dup_Polygon append inputPolygon)
-
-    ;Transformations
-    (send dup_Polygon scale scaleFactor scaleFactor) ; polygon scale
-    (send dup_Polygon rotate rotateAmount) ; polygon rotate in radians
-    (send dup_Polygon translate x1 y1) ; polygon translate    
-
-    ; draw polygon
-    (drawToScreen my-dc dup_Polygon)                 
-    (set! numPoly (+ 1 numPoly))
-
-    ; Calculate new X and Y
+     ; Calculate new X and Y
     ;SCALE
     (define scaled_X (* x1 scaleFactor))
     (define scaled_Y (* y1 scaleFactor))
     ;ROTATE
-    (define rx (* scaled_X (cos rotateAmount)))
-    (define ry (* scaled_Y (sin rotateAmount)))
+    (define rx (scaled_X (- rotateAmount)))
+    (define ry (scaled_Y (- rotateAmount)))
     ;TRANSLATE
     (define new_X (+ rx x1))
     (define new_Y (+ ry y1))
+    
+    (send my-dc draw-line x1 y1 new_X new_Y)
+
+   
    
 
     ;Do-Loop determines how many new branches
@@ -114,14 +95,14 @@
                                   [(= i 2) .3])])
         
     ; Recursive call for "left" branch"
-    (create-fractal-image (- depth 1) (* rotateFactor (+ rotateAmount (/ pi 6)))  scaled_X scaled_Y  scaleFactor dup_Polygon)
+    (create-fractal-image (- depth 1) (* rotateFactor (+ rotateAmount (/ pi 6)))  scaled_X scaled_Y  scaleFactor)
     ; Recursive call for "right" branch"
-    (create-fractal-image (- depth 1) (* rotateFactor (- rotateAmount (/ pi 6)))  scaled_X scaled_Y  scaleFactor dup_Polygon)))))
+    (create-fractal-image (- depth 1) (* rotateFactor (- rotateAmount (/ pi 6)))  scaled_X scaled_Y  scaleFactor)))))
 
 
 
 
-(create-fractal-image depth rotateAmount startX1 startY1 scaleFactor inputPolygon) ; CALL CREATE_FRACTAL_IMAGE FUNCTION
+(create-fractal-image depth rotateAmount startX1 startY1 scaleFactor) ; CALL CREATE_FRACTAL_IMAGE FUNCTION
 
 (display "Number of polygons drawn: ")
 (display numPoly)

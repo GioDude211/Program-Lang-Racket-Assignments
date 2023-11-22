@@ -114,27 +114,5 @@
 ; Use createPolygon to create your initial polygon
 (define myPolygon (createPolygon polygon-points))
 
-
-;THIS ENDED UP WORKING WELL--------
-
-;drawToScreen FUNCTION -NOTHING WRONG HERE
-(define (drawToScreen dc myPolygon)
-  (let ([xTrans 800]
-        [yTrans 800]
-        [xScale .15]
-        [yScale .15])
-    ; Convert the polygon to screen coordinates
-    (send myPolygon scale xScale yScale)
-    (send myPolygon translate xTrans yTrans)
-    
-    ; Draw the polygon in screen coordinates
-    (send dc set-pen "black" 2 'solid) ; set the line color 
-    (send dc set-brush (make-color 25 22 16) 'solid) ; set color for filling
-    (send dc draw-path myPolygon)
-    
-    ; Convert the polygon back to world coordinates
-    (send myPolygon translate (- xTrans) (- yTrans))
-    (send myPolygon scale (/ 1.0 xScale) (/ 1.0 yScale))))
-
     
 |#
