@@ -184,5 +184,8 @@
 (display numPoly)
 (newline)
 
-
+;So maybe put the call for the create-fractal-image where the create polygon would be in the zoomIn Function?
+;This could make sense and prevent he issue with needing to pass the x and y values. This could be a solution.
+;
+;
 my-bitmap
