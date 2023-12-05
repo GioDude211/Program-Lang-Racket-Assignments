@@ -45,17 +45,22 @@
 ; Start position and parameters for the fractal
 ; Adjust the initial X2 and Y2 translation amounts for the starting branch
 (define rotateAmount (/ pi 2))
-(define depth 7) ; depth of recursion
+(define depth 3) ; depth of recursion (was at 7
 (define scaleFactorX 1)
 (define scaleFactorY 1)
 
-;drawToScreen FUNCTION
-(define xTrans 800)
-(define yTrans 1380)
-(define xScale .25)
-(define yScale .25)
+;***************************drawToScreen FUNCTION********************
 
-(define (drawToScreen dc myPolygon)
+(define (drawToScreen dc myPolygon zoomX zoomY)
+
+  (define xTrans 800)
+  (define yTrans 1380)
+  (define xScale .25)
+  (define yScale .25)
+
+  ;apply zoom to polygon
+  (send myPolygon translate zoomX zoomY)
+  
     ; Convert the polygon to screen coordinates
     (send myPolygon scale xScale yScale)
     (send myPolygon translate xTrans yTrans)
@@ -93,8 +98,8 @@
 
 (define myPolygon (new dc-path%)) ;Define polygon
 
-;FUNCTION CREATES THE POLYGON AND CALLS drawToScreen
-(define (createPolygon x1 y1 x2 y2)
+;*******************FUNCTION CREATES THE POLYGON AND CALLS drawToScreen*********************
+(define (createPolygon x1 y1 x2 y2 zoomX zoomY)
    ; create polygon - FIX THIS
     (send myPolygon move-to x1 y1) ; input points (works like x-axis and y-axis)
     (send myPolygon line-to x2 y1)
@@ -102,12 +107,12 @@
     (send myPolygon line-to x1 y2)
     (send myPolygon close)
   ; draw polygon
-    (drawToScreen my-dc myPolygon)                 
+    (drawToScreen my-dc myPolygon zoomX zoomY)                 
     (set! numPoly (+ 1 numPoly))
   )
 
-;Function creates the branching of tree (MAIN)
-(define (create-fractal-image depth rotateAmount x1 y1 scaleFactorX scaleFactorY LengthX LengthY)
+;****************Function creates the branching of tree (MAIN)********************
+(define (create-fractal-image depth rotateAmount x1 y1 scaleFactorX scaleFactorY LengthX LengthY zoomX zoomY)
 
   (when (> depth 0) ;; loop on polygons. move it a little, then draw it.
     
@@ -120,7 +125,8 @@
     (define x2 (- x1 (* scaledDistanceX (cos rotateAmount))))
     (define y2 (- y1 (* scaledDistanceY (sin rotateAmount))))
 
-    (createPolygon x1 y1 x2 y2) ; create and draw the polygon
+    (createPolygon x1 y1 x2 y2 zoomX zoomY) ; create and draw the polygon
+    
 
     ;Do-Loop determines how many new branches
     (do ([i 0 (+ i 1)])
@@ -140,52 +146,63 @@
                                   [(= i 2) 0])])
         
     ; Recursive call for "left" branch"
-    (create-fractal-image (- depth 1) (- rotateAmount(* rotateFactor (/ pi 6)))  x2 y2 (* scaleFactorX  1) (* scaleFactorY 1) scaledDistanceX scaledDistanceY)
+    (create-fractal-image (- depth 1) (- rotateAmount(* rotateFactor (/ pi 6)))  x2 y2 (* scaleFactorX  1) (* scaleFactorY 1) scaledDistanceX scaledDistanceY zoomX zoomY)
     ; Recursive call for "right" branch"
-    (create-fractal-image (- depth 1) (+ rotateAmount (* rotateFactor (/ pi 6)))  x2 y2 (* scaleFactorX 1) (* scaleFactorY 1) scaledDistanceX scaledDistanceY)))))
+    (create-fractal-image (- depth 1) (+ rotateAmount (* rotateFactor (/ pi 6)))  x2 y2 (* scaleFactorX 1) (* scaleFactorY 1) scaledDistanceX scaledDistanceY zoomX zoomY)))))
 
 
-;reset all the polygons
+;*******************reset all the polygons***************************
 (define(resetPolygon)
   (send myPolygon reset)
   (set! numPoly 0)
 )
 
+; *************** Calls Main function and Applies zoom in ***************
 
-(define zoomScale .9) ;sets zoom scale
+(define (createImage zoomX zoomY)
 
-;zoomIn Function
-(define (zoomIn iterations)
-  (for ([i iterations])
-    (printf "Creating image ~a\n" i)
+  ; call main function
+  (create-fractal-image depth rotateAmount startX1 startY1 scaleFactorX scaleFactorY baseLengthX baseLengthY zoomX zoomY) ;
 
-    (createPolygon) ;ISSUE HERE needs to pass coordinates of the polygon, this is the issue due to branching
-                    ;Possible solution is to have the x1,y1,x2,y2 coordinates work as a global variable
-    (send my-dc save-file (format "myPic~a.png" i) 'png)
-    (if (< i (- iterations 1))
-        (resetPolygon)
-        #f)
-  
-    (set! wWidth (* wWidth zoomScale))
-    (set! wHeight (* wHeight zoomScale))
-    (printf "World window Size: ~a x ~a \n" wWidth wHeight)
-    (set! xScale (/ imageWidth wWidth))
-    (set! yScale (/ imageHeight wHeight))
-    (set! xTrans (* (/ wWidth 2) xScale))
-    (set! yTrans (* (/ wHeight 2) yScale))
-    )
-  )
+  ; calculate new window size
+  (define scaledWidth  (/ imageWidth zoomX))
+  (define scaledHeight (/ imageHeight zoomY))
 
-(zoomIn 3) ;the number dicatates how many images to create
+  ;print world window size
+    (printf "World Window Size: ~a" scaledHeight)
+    (printf " x ~a\n" scaledWidth))
 
-(create-fractal-image depth rotateAmount startX1 startY1 scaleFactorX scaleFactorY baseLengthX baseLengthY) ; CALL CREATE_FRACTAL_IMAGE FUNCTION
+; ***************File output (image saved) ***************
+
+(define (file_output test_count prefix) ; only good up to 999
+  (let ((suffix 
+  (cond
+    [(< test_count 10) (format "00~v.png" test_count)]
+    [(< test_count 100) (format "0~v.png" test_count)]
+    [ (format "~v.png" test_count)])))
+    (string-append prefix suffix)))
+
+; ***************Iteration and new zoom amount ***************
+
+; iterate over different zoom levels
+(for ((i (in-range 10))
+      (zoomX (in-range 1 301 0.03))
+      (zoomY (in-range 1 301 0.03)))
+  (let* ((file_name (file_output i "TEST-IMAGE"))
+         ;Adjust zoom
+         (newZoomX (* zoomX (+ 1 (* 0.01 i)))) 
+         (newZoomY (* zoomY (+ 1 (* 0.01 i)))))
+    (createImage newZoomX newZoomY)
+    ; get the final bitmap image
+    (send my-dc get-bitmap)
+    ; Save the image 
+    (send my-bitmap save-file file_name 'png)))
 
 (display "Number of polygons drawn: ")
 (display numPoly)
 (newline)
 
-;So maybe put the call for the create-fractal-image where the create polygon would be in the zoomIn Function?
-;This could make sense and prevent he issue with needing to pass the x and y values. This could be a solution.
-;
-;
+;Good News: the image is saving at each frame correctly
+;Bad News: its not zooming in as it does so
+
 my-bitmap
