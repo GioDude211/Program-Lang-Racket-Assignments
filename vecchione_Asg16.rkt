@@ -1,6 +1,6 @@
 ;Programmer: Giovanni Vecchione
 ;Date: 11/21/23
-;Subject: Asg_14
+;Subject: Asg_16 (based off asg14)
 
 #lang racket/gui
 
@@ -11,7 +11,7 @@
 ;Was able to build the shape of the tree using rectangular polygons which ended up requiring more book keeping then i thought.
 ;Rotate function did not work as it kept causing a spiral image!
 
-;ISSUE PRESENT: Was unable to scale down to the required polygon size however it is achievable with this program
+;ISSUE PRESENT FROM ASG14: Was unable to scale down to the required polygon size however it is achievable with this program
 ;by setting the values of the scaleFactorX and scaleFactorY to two decimal spots to the right it reached the goal.
 ; However it did not retian its shape (did not have time to correct it, noticed it too late)
 ;;determined this through iterating through the scaledDistanceX which would be the unit size of the polygon
@@ -50,7 +50,7 @@
 (define scaleFactorY 1)
 
 ;***************************drawToScreen FUNCTION********************
-
+;Still working on the scale math to follow the image correctly
 (define (drawToScreen dc myPolygon zoomX zoomY)
 
   (define xTrans 800)
@@ -59,7 +59,7 @@
   (define yScale .25)
 
   ;apply zoom to polygon
-  (send myPolygon translate zoomX zoomY)
+  (send myPolygon scale zoomX zoomY)
   
     ; Convert the polygon to screen coordinates
     (send myPolygon scale xScale yScale)
@@ -99,6 +99,7 @@
 (define myPolygon (new dc-path%)) ;Define polygon
 
 ;*******************FUNCTION CREATES THE POLYGON AND CALLS drawToScreen*********************
+;CHANGE: this was originally in the main function but to make debugging easier I seperated it.
 (define (createPolygon x1 y1 x2 y2 zoomX zoomY)
    ; create polygon - FIX THIS
     (send myPolygon move-to x1 y1) ; input points (works like x-axis and y-axis)
@@ -151,7 +152,7 @@
     (create-fractal-image (- depth 1) (+ rotateAmount (* rotateFactor (/ pi 6)))  x2 y2 (* scaleFactorX 1) (* scaleFactorY 1) scaledDistanceX scaledDistanceY zoomX zoomY)))))
 
 
-;*******************reset all the polygons***************************
+;*******************reset all the polygons (use if needed)***************************
 (define(resetPolygon)
   (send myPolygon reset)
   (set! numPoly 0)
@@ -162,7 +163,7 @@
 (define (createImage zoomX zoomY)
 
   ; call main function
-  (create-fractal-image depth rotateAmount startX1 startY1 scaleFactorX scaleFactorY baseLengthX baseLengthY zoomX zoomY) ;
+  (create-fractal-image depth rotateAmount startX1 startY1 scaleFactorX scaleFactorY baseLengthX baseLengthY zoomX zoomY) ;Calls the main function with the necessary zoom values for asg16
 
   ; calculate new window size
   (define scaledWidth  (/ imageWidth zoomX))
@@ -172,9 +173,10 @@
     (printf "World Window Size: ~a" scaledHeight)
     (printf " x ~a\n" scaledWidth))
 
-; ***************File output (image saved) ***************
 
-(define (file_output test_count prefix) ; only good up to 999
+; ***************File output (image saved) ***************
+;ISSUE: There is a limit to this method, 999 otherwise it errors if it goes above.
+(define (file_output test_count prefix)
   (let ((suffix 
   (cond
     [(< test_count 10) (format "00~v.png" test_count)]
@@ -182,21 +184,21 @@
     [ (format "~v.png" test_count)])))
     (string-append prefix suffix)))
 
-; ***************Iteration and new zoom amount ***************
 
-; iterate over different zoom levels
-(for ((i (in-range 10))
-      (zoomX (in-range 1 301 0.03))
-      (zoomY (in-range 1 301 0.03)))
+; ***************Iteration and new zoom amount ***************
+; iterate over different zoom levels, the number next to in-range dictates how many frames to save
+(for ((i (in-range 600))
+      (zoom_X (in-range 1 301 0.03))              ;zoom_X is the value dictating the x-axis
+      (zoom_Y (in-range 1 301 0.03)))             ;zoom_Y is the value dictating the y-axis
   (let* ((file_name (file_output i "TEST-IMAGE"))
          ;Adjust zoom
-         (newZoomX (* zoomX (+ 1 (* 0.01 i)))) 
-         (newZoomY (* zoomY (+ 1 (* 0.01 i)))))
-    (createImage newZoomX newZoomY)
+         (newZoom_X (* zoom_X (+ 1 (* 0.001 i)))) ;Adjust the scale of the zoom
+         (newZoom_Y (* zoom_Y (+ 1 (* 0.001 i)))));for both x and y
+    (createImage newZoom_X newZoom_Y)
     ; get the final bitmap image
     (send my-dc get-bitmap)
-    ; Save the image 
-    (send my-bitmap save-file file_name 'png)))
+    (send my-bitmap save-file file_name 'png))) ; This saves the image
+
 
 (display "Number of polygons drawn: ")
 (display numPoly)
